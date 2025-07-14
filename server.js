@@ -16,12 +16,26 @@ const authRouter=require('./routers/auth');
 const adminAuthRouter=require('./routers/adminAuth');
 
 
+//  local
+// app.use(cors({
+//   origin: 'http://localhost:5173',
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true
+// }));
+
+//online
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://skillora-onlineeducationplatform.netlify.app'
+];
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
+
 
 app.post('/logout', (req, res) => {
   res.clearCookie('token');
