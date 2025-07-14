@@ -24,14 +24,20 @@ const adminAuthRouter=require('./routers/adminAuth');
 // }));
 
 //online
-
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://skillora-onlineeducationplatform.netlify.app'
+  'https://skillora-onlineeducationplatform.netlify.app',
+  'https://6875140ef0a864d76068c777--skillora-onlineeducationplatform.netlify.app'
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS: ' + origin));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
