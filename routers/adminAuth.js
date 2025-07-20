@@ -168,10 +168,15 @@ adminAuthRouter.post("/admin/login",async(req,res)=>{
         
         if(isValidPassword){
             const token=jwt.sign({_id:newUser._id},jwt_secret_key);
+            // res.cookie("token", token, {
+            //     httpOnly: true,
+            //     secure: false,           // Set true only when using HTTPS
+            //     sameSite: "Lax"
+            // });
             res.cookie("token", token, {
                 httpOnly: true,
-                secure: false,           // Set true only when using HTTPS
-                sameSite: "Lax"
+                secure: true,           // Set true only when using HTTPS
+                sameSite: "None"
             });
             res.status(200).json({
             role:'admin',
