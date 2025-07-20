@@ -24,6 +24,7 @@ const commonAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, jwt_secret_key);
 
     // Check for admin first
+    
     const admin = await Admin.findById(decoded._id);
     if (admin) {
       req.admin = admin;

@@ -66,21 +66,39 @@ authRouter.post("/user/login",async(req,res)=>{
     }
 });
 
-
-
 authRouter.get("/user/getAllCourses",commonAuth,async(req,res)=>{
     try{
-        const AllCourses=await Course.find();
-        res.send(AllCourses);
-
+        const courses=await Course.find({});
+        if(!courses){
+            return res.status(404).json({message:"courses are not available"});
+        }
+        res.status(200).json({message:"courses are sent",courses});
     }catch(err){
         res.status(404).send(err.message); 
     }
 })
 
 
+authRouter.delete("/:id/removeCourse",async(req,res)=>{
+    try{
 
+    }catch(err){
+        res.status(404).json({message:err.message});
+    }
+})
 
+authRouter.get("/:user_id/getUser",async(req,res)=>{
+    try{
+        const user_id=req.params.user_id;
+        const user=await User.findById(user_id);
+        if(!user){
+            return res.json({message:"user is not found"});
+        }
+        res.status(200).json({message:"user is found",user});
+    }catch(err){
+        res.status(404).json({message:err.message});
+    }
+});
 
 
 

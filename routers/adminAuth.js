@@ -8,14 +8,19 @@ const cookieParser=require('cookie-parser');
 adminAuthRouter.use(express.json());
 adminAuthRouter.use(cookieParser());
 
-const upload=require('../middlewares/multer');
 const cloudinary=require('../config/cloudinary');
 const multer=require('multer');
 const Course=require('../models/course');
-
+const Pdf=require('../models/pdf')
 const commonAuth=require('../middlewares/Auth');
 const jwt_secret_key=process.env.JWT_SECRET_KEY;
 const jwt=require('jsonwebtoken');
+const admin = require('../models/admin');
+const User = require('../models/user');
+const PDF= require('../models/pdf');
+const course = require('../models/course');
+const uploadVideo = require('../middlewares/uploadVideo');
+const uploadPDF = require('../middlewares/uploadPDF');
 
 
 
@@ -94,31 +99,62 @@ adminAuthRouter.post("/admin/register",async(req,res)=>{
     }
 })
 
-adminAuthRouter.post("/:adminId/upload/videos",commonAuth,upload.single("file"),async(req,res)=>{
-    
-    try{
-        const {title,description}=req.body;
-        const file=req.file;
+adminAuthRouter.post("/:adminId/upload/videos", commonAuth, uploadVideo.single("file"), async (req, res) => {
+    try {
+    console.log("entered");
 
+    const { title, description } = req.body;
+    const file = req.file;
+    const adminId = req.params.adminId;
 
-        if(!file) return res.send("No file is Uploaded");
-        
-        const newCourse=new Course({
-            title,
-            description,
-            media: [{
-                url: file.path, // Cloudinary secure URL
-                format: file.format,
-                fileType: file.resource_type || 'auto'
-            }],
-            createdBy: req.admin._id,
-        });
-        await newCourse.save();
-        res.json({message:"course created",course:newCourse});
-    }catch(err){
-        res.status(404).send(err.message);
-    }
+    if (!file) return res.status(400).json({ message: "No file uploaded" });
+
+    console.log("Admin ID:", adminId);
+
+    const newCourse = new Course({
+      title,
+      description,
+      media: [{
+        url: file.path,
+        format: file.format,
+        fileType: file.resource_type || 'video',
+      }],
+      createdBy: req.admin._id,
+    });
+
+    await newCourse.save();
+    res.status(201).json({ message: "Course created", course: newCourse });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 });
+
+adminAuthRouter.post("/:adminId/upload/pdf", commonAuth, uploadPDF.single("file"), async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    const file = req.file;
+    const adminId = req.params.adminId;
+
+    if (!file) return res.status(400).json({ message: "No file uploaded" });
+
+    const newPdf = new Pdf({
+      title,
+      description,
+      url: file.path, // Cloudinary secure_url
+      uploadedBy: req.admin._id,
+      fileType: file.mimetype || "application/pdf",
+    });
+
+    await newPdf.save();
+
+    res.status(200).json({ message: "PDF uploaded successfully", pdf: newPdf });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 adminAuthRouter.post("/admin/login",async(req,res)=>{
     try{
@@ -165,5 +201,69 @@ adminAuthRouter.post("/admin/logout",async(req,res)=>{
     }
 })
 
+adminAuthRouter.get("/getAdmins",async(req,res)=>{
+    try{
+        const admins=await Admin.find({});
+        if(!admins){
+            return res.json({message:"admins were not available"});
+        }
+        res.status(200).json({message:"admins are found",admins});
+    }catch(err){
+        res.status(401).send(err.message);
+    }
+});
+
+adminAuthRouter.get("/getUsers",async(req,res)=>{
+    try{
+        const users=await User.find({});
+        if(!users){
+            return res.json({message:"users are not found bro"});
+        }
+        res.status(200).json({message:"users are found",users});
+    }catch(err){
+        res.status(404).json({message:err.message});
+    }
+});
+
+adminAuthRouter.get("/getPDF",async(req,res)=>{
+    try{
+        const getpdf=await PDF.find({});
+        if(!getpdf){
+            return res.status(401).json({message:"pdf's are not found"});
+        }
+        res.status(200).json({message:"pdf's are sent",getpdf});
+    }catch(err){
+        res.status(401).json({message:err.message});
+    }
+})
+
+adminAuthRouter.delete("/deletePDF/:id",async(req,res)=>{
+    try{
+        console.log(req.params.id);
+        const id=req.params.id;
+        const findPdf=await PDF.findById(id);
+        if(!findPdf){
+            return res.status(401).json({message:"pdf is not found"});
+        }
+        await PDF.findByIdAndDelete(id);
+        res.status(200).json({message:"pdf is removed successfully",findPdf});
+    }catch(err){
+        res.status(401).json({message:err.message});
+    }
+})
+
+adminAuthRouter.delete("/deleteCourse/:courseId",async(req,res)=>{
+    try{
+        const courseId=req.params.courseId;
+        const findCourse=await course.findById(courseId);
+        if(!findCourse){
+            return res.status(401).json({message:"courses are not found"});
+        }
+        await course.findByIdAndDelete(courseId);
+        res.status(200).json({message:"successfully remove the course",findCourse});
+    }catch(err){
+        res.status(401).json({message:err.message});
+    }
+});
 
 module.exports=adminAuthRouter;

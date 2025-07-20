@@ -19,8 +19,9 @@ const UserSchema=new mongoose.Schema({
     phone:{
         type:String,
     },
-    profilePic:{
+    imageUrl:{
         type:String,
+        required:true,
     },
     gender:{
         type:String,
