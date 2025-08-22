@@ -101,7 +101,6 @@ adminAuthRouter.post("/admin/register",async(req,res)=>{
 
 adminAuthRouter.post("/:adminId/upload/videos", commonAuth, uploadVideo.single("file"), async (req, res) => {
     try {
-    console.log("entered");
 
     const { title, description } = req.body;
     const file = req.file;

@@ -21,7 +21,6 @@ const UserSchema=new mongoose.Schema({
     },
     imageUrl:{
         type:String,
-        required:true,
     },
     gender:{
         type:String,

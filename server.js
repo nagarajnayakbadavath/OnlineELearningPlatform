@@ -5,7 +5,6 @@ const cors=require('cors');
 const app=express();
 const cookieParser = require("cookie-parser");
 
-
 const PORT = process.env.PORT;
 // app.use(express.json());
 app.use(express.json({ limit: "200mb" }));

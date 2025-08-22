@@ -30,8 +30,8 @@ authRouter.post("/user/register",async(req,res)=>{
         await user.save();
         res.status(200).json({success:true,message:"registration of user is successfull"});
     }catch(err){
-        res.status(404).send(err.message);
-    }
+    res.status(500).json({ success:false, message: err.message });
+}
 });
 
 authRouter.post("/user/login",async(req,res)=>{
